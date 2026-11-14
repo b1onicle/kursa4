@@ -1,0 +1,65 @@
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    padding: 0;
+    background: #0d0b0c;
+}
+
+body {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #0d0b0c;
+    color: #f9f9ff;
+    font-family: Arial, sans-serif;
+}
+
+#root {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #0d0b0c;
+}
+
+.app {
+    width: 100%;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    background: #0d0b0c;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+    font-family: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+.appContent {
+    min-height: 100vh;
+    margin-left: 235px;
+
+    background: #0d0b0c;
+}
+
+@media (max-width: 850px) {
+    .appContent {
+        margin-left: 0;
+    }
+}

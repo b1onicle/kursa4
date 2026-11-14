@@ -1,0 +1,120 @@
+.page {
+    min-height: 70vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px 0;
+}
+
+.card {
+    width: 100%;
+    max-width: 520px;
+
+    padding: 35px;
+
+    background: #ffffff;
+    border-radius: 20px;
+
+    box-shadow: 0 12px 35px rgba(45, 37, 35, 0.1);
+}
+
+.card h1 {
+    margin: 0 0 10px;
+
+    color: #2D2523;
+    font-size: 30px;
+}
+
+.subtitle {
+    margin-bottom: 25px;
+
+    color: #896E69;
+    line-height: 1.5;
+}
+
+.card form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.card label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+
+    color: #2D2523;
+    font-weight: 600;
+}
+
+.card input {
+    box-sizing: border-box;
+    width: 100%;
+
+    padding: 12px 14px;
+
+    border: 1px solid #ddd2ce;
+    border-radius: 10px;
+
+    font-size: 15px;
+    outline: none;
+}
+
+.card input:focus {
+    border-color: #D55448;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.card button {
+    margin-top: 5px;
+
+    padding: 13px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #D55448;
+    color: #ffffff;
+
+    font-size: 16px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.card button:hover {
+    background: #c4493e;
+}
+
+.card button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.error {
+    margin: 0;
+
+    color: #c0392b;
+    font-size: 14px;
+}
+
+.login {
+    margin-top: 25px;
+
+    text-align: center;
+
+    color: #896E69;
+}
+
+.login a {
+    color: #D55448;
+    font-weight: 600;
+    text-decoration: none;
+}

@@ -1,0 +1,301 @@
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 200;
+
+    width: 235px;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 28px 16px 18px;
+
+    background: #0a090a;
+    border-right: 1px solid rgba(255,255,255,.06);
+
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+
+    box-shadow: 15px 0 50px rgba(0,0,0,.35);
+}
+
+.sidebar.open {
+    transform: translateX(0);
+}
+
+.logo {
+    padding: 0 12px;
+    margin-bottom: 48px;
+}
+
+.logo a {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+
+    color: #f5f1ef;
+
+    font-size: 19px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+
+    text-decoration: none;
+}
+
+.logoMark {
+    color: #d55448;
+    font-size: 21px;
+    font-weight: 900;
+}
+
+.navigation {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sectionTitle {
+    margin: 0 12px 9px;
+
+    color: #514b49;
+
+    font-size: 9px;
+    font-weight: 750;
+
+    letter-spacing: 1.5px;
+}
+
+.navigation a {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 11px;
+
+    height: 42px;
+    padding: 0 12px;
+
+    border-radius: 8px;
+
+    color: #77706e;
+
+    font-size: 13px;
+    font-weight: 550;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s,
+        color 0.2s;
+}
+
+.navigation a:hover {
+    background: rgba(255, 255, 255, 0.035);
+    color: #d9d3d1;
+}
+
+.navigation a.active {
+    background: rgba(213, 84, 72, 0.09);
+    color: #e87568;
+}
+
+.navigation a.active::before {
+    content: "";
+
+    position: absolute;
+    left: 0;
+
+    width: 2px;
+    height: 18px;
+
+    border-radius: 2px;
+
+    background: #d55448;
+}
+
+.icon {
+    width: 19px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #625b59;
+
+    font-size: 17px;
+}
+
+.active .icon {
+    color: #d55448;
+}
+
+.divider {
+    height: 1px;
+    margin: 24px 12px;
+
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.spacer {
+    flex: 1;
+}
+
+.addButton {
+    height: 43px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    margin-bottom: 14px;
+
+    border-radius: 8px;
+
+    background: #d55448;
+    color: white;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    text-decoration: none;
+
+    transition:
+        background 0.2s,
+        transform 0.2s;
+}
+
+.addButton:hover {
+    background: #e26355;
+    transform: translateY(-1px);
+}
+
+.addButton span {
+    font-size: 17px;
+    font-weight: 400;
+}
+
+/* Пользователь */
+
+.user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.avatar {
+    width: 34px;
+    height: 34px;
+
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #21191a;
+    color: #d55448;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+.userInfo {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.userInfo strong {
+    overflow: hidden;
+
+    color: #d8d2d0;
+
+    font-size: 12px;
+    font-weight: 650;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.userInfo span {
+    overflow: hidden;
+
+    color: #57514f;
+
+    font-size: 10px;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.logout {
+    margin-left: auto;
+
+    padding: 4px;
+
+    border: none;
+    background: none;
+
+    color: #57514f;
+
+    font-size: 17px;
+
+    cursor: pointer;
+
+    transition: color 0.2s;
+}
+
+.logout:hover {
+    color: #d55448;
+}
+
+/* Авторизация */
+
+.auth {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    padding: 12px;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.auth a {
+    color: #77706e;
+
+    font-size: 12px;
+    text-decoration: none;
+}
+
+.auth a:hover {
+    color: #d55448;
+}
+
+/* Затемнение на мобильном */
+
+.overlay {
+    display: none;
+}
+
+/* Мобильная версия */
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(3px);
+}

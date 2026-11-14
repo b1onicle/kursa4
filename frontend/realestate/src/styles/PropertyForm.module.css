@@ -1,0 +1,346 @@
+.page {
+    min-height: calc(100vh - 68px);
+    padding: 55px 24px 90px;
+    background: #0d0b0c;
+    color: #f5f1ef;
+}
+
+.container {
+    width: 100%;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.heading {
+    margin-bottom: 38px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 17px;
+    color: #d55448;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.7px;
+}
+
+.heading h1 {
+    margin: 0;
+    font-size: clamp(30px, 4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+}
+
+.heading > p {
+    margin-top: 14px;
+    color: #77706e;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.section {
+    padding: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    background: #151112;
+}
+
+.sectionHeading {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 28px;
+}
+
+.sectionHeading > span {
+    padding-top: 3px;
+    color: #d55448;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.sectionHeading h2 {
+    margin: 0;
+    color: #eee9e7;
+    font-size: 17px;
+    font-weight: 650;
+}
+
+.sectionHeading p {
+    margin: 7px 0 0;
+    color: #706967;
+    font-size: 11px;
+    line-height: 1.6;
+}
+
+.field {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    margin-bottom: 22px;
+}
+
+.field:last-child {
+    margin-bottom: 0;
+}
+
+.field label {
+    color: #aaa3a1;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.field input,
+.field select,
+.field textarea {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    outline: none;
+    background: #0d0b0c;
+    color: #eee9e7;
+    font-size: 12px;
+    transition: border-color 0.2s;
+}
+
+.field input,
+.field select {
+    height: 44px;
+}
+
+.field textarea {
+    min-height: 135px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+    color: #514b49;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+    border-color: rgba(213, 84, 72, 0.65);
+}
+
+.field select {
+    cursor: pointer;
+}
+
+.twoColumns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.threeColumns {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+/* Загрузка фотографий */
+
+.uploadArea {
+    min-height: 175px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border: 1px dashed rgba(255, 255, 255, 0.14);
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.015);
+    cursor: pointer;
+    transition:
+        border-color 0.2s,
+        background 0.2s;
+}
+
+.uploadArea:hover {
+    border-color: rgba(213, 84, 72, 0.5);
+    background: rgba(213, 84, 72, 0.035);
+}
+
+.uploadArea input {
+    display: none;
+}
+
+.uploadIcon {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9px;
+    background: rgba(213, 84, 72, 0.1);
+    color: #d55448;
+    font-size: 24px;
+}
+
+.uploadArea strong {
+    color: #d8d2d0;
+    font-size: 12px;
+}
+
+.uploadArea > span:last-child {
+    color: #625b59;
+    font-size: 10px;
+}
+
+.photoList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.photoItem {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.025);
+}
+
+.photoItem > span {
+    overflow: hidden;
+    color: #aaa3a1;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.photoItem button {
+    flex-shrink: 0;
+    border: none;
+    background: transparent;
+    color: #d55448;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+/* Ошибки и публикация */
+
+.error {
+    padding: 14px 16px;
+    border: 1px solid rgba(213, 84, 72, 0.25);
+    border-radius: 7px;
+    background: rgba(213, 84, 72, 0.07);
+    color: #e87568;
+    font-size: 12px;
+    line-height: 1.7;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+}
+
+.formFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding-top: 8px;
+}
+
+.formFooter p {
+    max-width: 300px;
+    color: #625b59;
+    font-size: 10px;
+    line-height: 1.6;
+}
+
+.submitButton,
+.message button {
+    min-height: 45px;
+    padding: 0 20px;
+    border: none;
+    border-radius: 7px;
+    background: #d55448;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.submitButton:hover,
+.message button:hover {
+    background: #e26355;
+}
+
+.submitButton:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* Сообщение для гостей */
+
+.message {
+    max-width: 450px;
+    margin: 100px auto;
+    text-align: center;
+}
+
+.message h1 {
+    font-size: 30px;
+}
+
+.message p {
+    margin: 15px 0 25px;
+    color: #77706e;
+    font-size: 13px;
+    line-height: 1.7;
+}
+
+/* Адаптивность */
+
+@media (max-width: 600px) {
+    .page {
+        padding: 35px 15px 60px;
+    }
+
+    .heading {
+        margin-bottom: 28px;
+    }
+
+    .section {
+        padding: 22px 17px;
+    }
+
+    .sectionHeading h2 {
+        font-size: 15px;
+    }
+
+    .twoColumns,
+    .threeColumns {
+        grid-template-columns: 1fr;
+        gap: 0;
+    }
+
+    .formFooter {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .formFooter p {
+        max-width: none;
+    }
+
+    .submitButton {
+        width: 100%;
+    }
+}

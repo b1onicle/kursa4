@@ -1,0 +1,472 @@
+/*
+  Landing.module.css, версия 2
+  Имена классов те же, разметку менять не нужно.
+  Палитра, шрифт и ширина контента лежат в переменных ниже.
+*/
+
+.page {
+    /* Палитра: бутылочно-зелёный, тёплая бумага, шафран */
+    --bg: #0e2621;
+    --bg-deep: #081a16;
+    --surface: #133029;
+    --line: rgba(244, 239, 227, 0.16);
+    --text: #f4efe3;
+    --muted: #b6c4bd;
+    --faint: #8ea49b;
+    --accent: #f2b632;
+    --accent-hover: #ffc94d;
+    --on-accent: #10251f;
+    --focus: #ffd980;
+
+    /* Шрифт: Geologica, есть кириллица. Можно подменить через --landing-font */
+    --font: var(
+        --landing-font,
+        "Geologica Variable",
+        "Geologica",
+        ui-sans-serif,
+        system-ui,
+        -apple-system,
+        "Segoe UI",
+        Roboto,
+        sans-serif
+    );
+
+    /* Поля секций: 20-64px, на широких экранах контент ограничен 1200px */
+    --gutter: max(clamp(20px, 5vw, 64px), calc((100% - 1200px) / 2));
+
+    min-height: calc(100vh - 68px);
+    min-height: calc(100dvh - 68px);
+
+    background: var(--bg);
+    color: var(--text);
+    color-scheme: dark;
+
+    font-family: var(--font);
+    font-size: 1rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- HERO ---------- */
+
+/* Заголовок сверху, цифры прижаты к низу экрана */
+.hero {
+    display: flex;
+    flex-direction: column;
+
+    min-height: 100vh;
+    min-height: min(calc(100dvh - 68px), 860px);
+
+    padding-block-start: clamp(48px, 8vw, 104px);
+    padding-block-end: clamp(40px, 5vw, 64px);
+    padding-inline: var(--gutter);
+}
+
+.heroContent {
+    max-width: 68rem;
+
+    padding-bottom: clamp(48px, 8vw, 96px);
+}
+
+.label {
+    display: block;
+
+    margin-bottom: 28px;
+
+    color: var(--muted);
+
+    font-size: 1.0625rem;
+    font-weight: 500;
+}
+
+.hero h1 {
+    margin: 0;
+
+    font-size: clamp(2.75rem, 1rem + 7.4vw, 6.5rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+
+    text-wrap: balance;
+    overflow-wrap: break-word;
+}
+
+/* Акцентное слово в заголовке убрано намеренно: цвет наследуется */
+.hero h1 span {
+    color: inherit;
+}
+
+.description {
+    max-width: 50ch;
+
+    margin: 32px 0 0;
+
+    color: var(--muted);
+
+    font-size: clamp(1.0625rem, 1rem + 0.35vw, 1.3125rem);
+    line-height: 1.55;
+
+    text-wrap: pretty;
+}
+
+.description br {
+    display: none;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 44px;
+}
+
+/* ---------- BUTTONS ---------- */
+
+.primaryButton,
+.secondaryButton {
+    min-height: 56px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0 28px;
+
+    border-radius: 999px;
+
+    font-family: inherit;
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition:
+        background-color 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.primaryButton {
+    gap: 14px;
+
+    border: 1px solid transparent;
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.primaryButton span {
+    display: inline-block;
+
+    transition: transform 0.18s ease;
+}
+
+.secondaryButton {
+    border: 1px solid rgba(244, 239, 227, 0.32);
+    background: transparent;
+    color: var(--text);
+}
+
+.primaryButton:active,
+.secondaryButton:active {
+    transform: translateY(1px);
+}
+
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 3px;
+}
+
+@media (hover: hover) {
+    .primaryButton:hover {
+        background: var(--accent-hover);
+    }
+
+    .primaryButton:hover span {
+        transform: translateX(3px);
+    }
+
+    .secondaryButton:hover {
+        border-color: rgba(244, 239, 227, 0.6);
+        background: rgba(244, 239, 227, 0.07);
+    }
+}
+
+/* ---------- STATS ---------- */
+
+.heroInfo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 28px clamp(32px, 6vw, 88px);
+
+    margin-top: auto;
+    padding-top: 28px;
+
+    border-top: 1px solid var(--line);
+}
+
+.heroInfo div {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.heroInfo strong {
+    color: var(--text);
+
+    font-size: clamp(1.75rem, 1.2rem + 1.8vw, 2.5rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.025em;
+    font-variant-numeric: tabular-nums;
+}
+
+.heroInfo span {
+    color: var(--muted);
+
+    font-size: 0.9375rem;
+}
+
+/* ---------- FEATURES ---------- */
+
+/* Слева заголовок, он остаётся на экране, справа список */
+.features {
+    display: grid;
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    column-gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+
+    padding-block: clamp(72px, 10vw, 136px);
+    padding-inline: var(--gutter);
+
+    background: var(--surface);
+}
+
+.sectionHeader {
+    grid-column: 1;
+    grid-row: 1;
+
+    position: sticky;
+    top: 104px;
+
+    margin: 0;
+}
+
+.sectionHeader h2 {
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: clamp(2rem, 1.2rem + 2.8vw, 3.25rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+
+    text-wrap: balance;
+}
+
+.featureGrid {
+    grid-column: 2;
+    grid-row: 1;
+
+    display: grid;
+
+    border-bottom: 1px solid var(--line);
+}
+
+.feature {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    grid-template-areas:
+        "num title"
+        ". text";
+    row-gap: 12px;
+    align-items: baseline;
+
+    padding-block: 32px;
+
+    border-top: 1px solid var(--line);
+}
+
+.number {
+    grid-area: num;
+
+    color: var(--faint);
+
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.feature h3 {
+    grid-area: title;
+
+    margin: 0;
+
+    color: var(--text);
+
+    font-size: clamp(1.375rem, 1rem + 1.2vw, 1.875rem);
+    font-weight: 650;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+}
+
+.feature p {
+    grid-area: text;
+
+    max-width: 52ch;
+
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 1.0625rem;
+    line-height: 1.6;
+
+    text-wrap: pretty;
+}
+
+/* ---------- CTA ---------- */
+
+/* Единственная крупная цветная плоскость на странице */
+.bottomCta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 36px 48px;
+
+    padding-block: clamp(72px, 10vw, 136px);
+    padding-inline: var(--gutter);
+
+    background: var(--accent);
+    color: var(--on-accent);
+}
+
+.bottomCta h2 {
+    flex: 1 1 22rem;
+    max-width: 18ch;
+
+    margin: 0;
+
+    color: var(--on-accent);
+
+    font-size: clamp(2.25rem, 1rem + 4.2vw, 4.75rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+
+    text-wrap: balance;
+}
+
+/* На жёлтом фоне кнопки меняют цвета */
+.bottomCta .primaryButton {
+    background: var(--on-accent);
+    color: var(--text);
+}
+
+.bottomCta .secondaryButton {
+    border-color: rgba(16, 37, 31, 0.45);
+    color: var(--on-accent);
+}
+
+.bottomCta .primaryButton:focus-visible,
+.bottomCta .secondaryButton:focus-visible {
+    outline-color: var(--on-accent);
+}
+
+@media (hover: hover) {
+    .bottomCta .primaryButton:hover {
+        background: var(--bg-deep);
+    }
+
+    .bottomCta .secondaryButton:hover {
+        border-color: var(--on-accent);
+        background: rgba(16, 37, 31, 0.08);
+    }
+}
+
+/* ---------- TABLET ---------- */
+
+@media (max-width: 850px) {
+    .hero {
+        min-height: 100vh;
+        min-height: min(calc(100dvh - 64px), 860px);
+    }
+
+    .page {
+        min-height: calc(100vh - 64px);
+        min-height: calc(100dvh - 64px);
+    }
+
+    .features {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .sectionHeader {
+        grid-column: 1;
+
+        position: static;
+
+        margin-bottom: 40px;
+    }
+
+    .featureGrid {
+        grid-column: 1;
+        grid-row: 2;
+    }
+
+    .feature {
+        padding-block: 28px;
+    }
+}
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 600px) {
+    .actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .primaryButton,
+    .secondaryButton {
+        width: 100%;
+    }
+
+    .heroInfo {
+        gap: 24px 32px;
+    }
+
+    .feature {
+        grid-template-columns: 2.25rem minmax(0, 1fr);
+    }
+
+    .bottomCta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .bottomCta h2 {
+        flex: 0 0 auto;
+    }
+}
+
+/* ---------- REDUCED MOTION ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .primaryButton,
+    .secondaryButton,
+    .primaryButton span {
+        transition: none;
+    }
+
+    .primaryButton:active,
+    .secondaryButton:active,
+    .primaryButton:hover span {
+        transform: none;
+    }
+}
