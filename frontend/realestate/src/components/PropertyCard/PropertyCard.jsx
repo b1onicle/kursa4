@@ -1,92 +1,64 @@
-
 import React from "react";
 import { Link } from "react-router-dom";
-import { useCurrentUser } from "../../utils/auth";
-import styles from "../../styles/PropertyCard.module.css";
-import {
-    useGetFavoritesQuery,
-    useAddFavoriteMutation,
-    useDeleteFavoriteMutation,
-} from "../../features/api/apiSlice";
 
+import styles from "../../styles/PropertyCard.module.css";
+import FavoriteButton from "../FavoriteButton/FavoriteButton";
+import FloorGauge from "../FloorGauge/FloorGauge";
+import {
+    formatArea,
+    formatPrice,
+    listingKind,
+    thumbnailUrl,
+    STATUS_LABELS,
+} from "../../utils/format";
 
 const PropertyCard = ({ property }) => {
-
-    const currentUser = useCurrentUser();
-    const USER_ID = currentUser?.id;
-
-    const {
-    data: favorites = [],
-} = useGetFavoritesQuery(USER_ID, {
-    skip: !USER_ID,
-});
-
-    const [addFavorite] = useAddFavoriteMutation();
-    const [deleteFavorite] = useDeleteFavoriteMutation();
-
-    const favorite = favorites.find(
-        (item) => item.property === property.id
-    );
-
-    const handleFavorite = async () => {
-        if (favorite) {
-            await deleteFavorite(favorite.id);
-        } else {
-            await addFavorite({
-                user: USER_ID,
-                property: property.id,
-            });
-        }
-    };
-
-    const photo = property.photos?.[0]?.image;
+    const photo = thumbnailUrl(property.photos?.[0]);
+    const isInactive = property.status && property.status !== "active";
 
     return (
-        <article className={styles.card}>
-            <div className={styles.image}>
+        <article className={`${styles.card} ${isInactive ? styles.inactive : ""}`}>
+            <div className={styles.media}>
                 {photo ? (
-                    <img
-                        src={`http://127.0.0.1:8000${photo}`}
-                        alt={property.title}
-                    />
+                    <img src={photo} alt="" loading="lazy" />
                 ) : (
-                    <span>Нет фото</span>
+                    <span className={styles.noPhoto}>Без фото</span>
                 )}
 
-                <button
-                    className={styles.favorite}
-                    onClick={handleFavorite}
-                >
-                    {favorite ? "♥" : "♡"}
-                </button>
+                {isInactive && (
+                    <span className={styles.status}>
+                        {STATUS_LABELS[property.status]}
+                    </span>
+                )}
+
+                <FavoriteButton propertyId={property.id} className={styles.favorite} />
             </div>
 
-            <div className={styles.content}>
-                <div className={styles.price}>
-                    {Number(property.price).toLocaleString("ru-RU")} ₸
-                </div>
+            <div className={styles.body}>
+                <p className={styles.kind}>{listingKind(property)}</p>
+
+                <p className={`${styles.price} num`}>
+                    {formatPrice(property.price)}
+                    {property.deal_type === "rent" && (
+                        <span className={styles.per}> в месяц</span>
+                    )}
+                </p>
 
                 <h3 className={styles.title}>
-                    {property.title}
+                    <Link to={`/properties/${property.id}`}>{property.title}</Link>
                 </h3>
-
-                <p className={styles.info}>
-                    {property.area} м²
-                    {property.rooms && ` · ${property.rooms} комн.`}
-                    {property.floor &&
-                        ` · ${property.floor} этаж`}
-                </p>
 
                 <p className={styles.address}>
                     {property.city}, {property.address}
                 </p>
 
-                <Link
-                    to={`/properties/${property.id}`}
-                    className={styles.button}
-                >
-                    Подробнее
-                </Link>
+                <div className={styles.specs}>
+                    {property.rooms && (
+                        <span className="num">{property.rooms} комн.</span>
+                    )}
+                    <span className="num">{formatArea(property.area)} м²</span>
+                    <FloorGauge floor={property.floor} total={property.total_floors} />
+                </div>
             </div>
         </article>
     );

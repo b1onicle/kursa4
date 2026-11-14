@@ -1,0 +1,87 @@
+.page {
+    display: grid;
+    place-items: start center;
+
+    padding: clamp(40px, 8vw, 96px) var(--gutter) 96px;
+}
+
+.card {
+    width: 100%;
+    max-width: 440px;
+}
+
+.card h1 {
+    font-size: clamp(28px, 4vw, 36px);
+    letter-spacing: -0.035em;
+}
+
+.subtitle {
+    margin-top: 10px;
+    color: var(--slate);
+}
+
+.form {
+    display: grid;
+    gap: 16px;
+
+    margin-top: 32px;
+    padding: 28px;
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--paper);
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.optional {
+    color: var(--muted);
+    font-weight: 400;
+}
+
+.submit {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 6px;
+}
+
+.note {
+    color: var(--slate);
+    font-size: 14px;
+}
+
+.forgot {
+    justify-self: end;
+    margin-top: -6px;
+
+    color: var(--dusk-text);
+    font-size: 14px;
+    font-weight: 500;
+    text-underline-offset: 4px;
+}
+
+.switch {
+    margin-top: 20px;
+    color: var(--slate);
+    text-align: center;
+}
+
+.switch a {
+    color: var(--dusk-text);
+    font-weight: 600;
+    text-underline-offset: 4px;
+}
+
+@media (max-width: 480px) {
+    .form {
+        padding: 20px;
+    }
+
+    .row {
+        grid-template-columns: 1fr;
+    }
+}

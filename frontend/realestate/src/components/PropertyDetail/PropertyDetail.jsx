@@ -1,17 +1,33 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import styles from "../../styles/PropertyDetail.module.css";
+import FavoriteButton from "../FavoriteButton/FavoriteButton";
+import FloorGauge from "../FloorGauge/FloorGauge";
 
 import {
     useGetPropertyQuery,
-    useGetFavoritesQuery,
-    useAddFavoriteMutation,
-    useDeleteFavoriteMutation,
     useGetUserQuery,
+    useDeletePropertyMutation,
 } from "../../features/api/apiSlice";
 
 import { useCurrentUser } from "../../utils/auth";
+import {
+    formatArea,
+    formatPrice,
+    listingKind,
+    mediaUrl,
+    thumbnailUrl,
+    STATUS_LABELS,
+} from "../../utils/format";
+import { useDocumentTitle } from "../../utils/useDocumentTitle";
+
+const formatDate = (value) =>
+    new Date(value).toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+    }).replace(/\s?г\.$/, "");
 
 const PropertyDetail = () => {
     const { id } = useParams();
@@ -20,286 +36,196 @@ const PropertyDetail = () => {
     const currentUser = useCurrentUser();
     const USER_ID = currentUser?.id;
 
-    const {
-        data: property,
-        isLoading,
-        isError,
-    } = useGetPropertyQuery(id);
+    const [photoIndex, setPhotoIndex] = useState(0);
 
-    const { data: owner } = useGetUserQuery(
-        property?.owner,
-        {
-            skip: !property?.owner,
-        }
-    );
+    const { data: property, isLoading, isError } = useGetPropertyQuery(id);
 
-    const { data: favorites = [] } =
-        useGetFavoritesQuery(USER_ID, {
-            skip: !USER_ID,
-        });
+    const { data: owner } = useGetUserQuery(property?.owner, {
+        skip: !property?.owner,
+    });
 
-    const [addFavorite] = useAddFavoriteMutation();
-    const [deleteFavorite] =
-        useDeleteFavoriteMutation();
+    const [deleteProperty, { isLoading: isDeleting }] = useDeletePropertyMutation();
 
-    const favorite = favorites.find(
-        (item) => item.property === property?.id
-    );
+    const isOwner = Boolean(USER_ID) && property?.owner === USER_ID;
+    useDocumentTitle(property?.title);
 
-    const handleFavorite = async () => {
-        if (!USER_ID) {
-            navigate("/login");
+    const handleDelete = async () => {
+        if (!window.confirm("Удалить объявление? Это действие нельзя отменить.")) {
             return;
         }
 
-        if (favorite) {
-            await deleteFavorite(favorite.id);
-        } else {
-            await addFavorite({
-                user: USER_ID,
-                property: property.id,
-            });
+        try {
+            await deleteProperty(property.id).unwrap();
+            navigate("/properties");
+        } catch (error) {
+            console.error("Ошибка удаления объявления:", error);
+            window.alert("Не удалось удалить объявление. Попробуйте ещё раз.");
         }
     };
 
     if (isLoading) {
-        return (
-            <div className={styles.message}>
-                Загрузка объявления...
-            </div>
-        );
+        return <div className={`page ${styles.message}`}>Загружаем объявление…</div>;
     }
 
     if (isError || !property) {
         return (
-            <div className={styles.message}>
-                <h2>Объявление не найдено</h2>
-
-                <Link
-                    to="/properties"
-                    className={styles.backButton}
-                >
-                    Вернуться к объявлениям
+            <div className={`page ${styles.message}`}>
+                <h1>Объявление не найдено</h1>
+                <p>Возможно, его удалил владелец.</p>
+                <Link to="/properties" className="btn btn-primary">
+                    Открыть каталог
                 </Link>
             </div>
         );
     }
 
     const photos = property.photos || [];
-
-    const propertyType = {
-        apartment: "Квартира",
-        house: "Дом",
-        commercial:
-            "Коммерческая недвижимость",
-    };
-
-    const dealType = {
-        sale: "Продажа",
-        rent: "Аренда",
-    };
+    const currentPhoto = photos[Math.min(photoIndex, photos.length - 1)];
+    const ownerName = owner
+        ? `${owner.first_name || ""} ${owner.last_name || ""}`.trim() || owner.username
+        : "Владелец";
+    const isInactive = property.status && property.status !== "active";
 
     return (
-        <div className={styles.page}>
-            <div className={styles.container}>
-                <Link
-                    to="/properties"
-                    className={styles.back}
-                >
-                    ← Все объявления
-                </Link>
+        <div className="page">
+            <Link to="/properties" className={styles.back}>
+                Назад к каталогу
+            </Link>
 
-                <div className={styles.layout}>
-                    <section className={styles.gallery}>
+            <div className={styles.layout}>
+                <div className={styles.main}>
+                    <section className={styles.gallery} aria-label="Фотографии">
                         <div className={styles.mainImage}>
-                            {photos.length > 0 ? (
+                            {currentPhoto ? (
                                 <img
-                                    src={`http://127.0.0.1:8000${photos[0].image}`}
+                                    key={currentPhoto.id}
+                                    src={mediaUrl(currentPhoto.image)}
                                     alt={property.title}
                                 />
                             ) : (
-                                <span>
-                                    Нет фотографий
+                                <span className={styles.noPhoto}>
+                                    Владелец пока не добавил фотографии
                                 </span>
                             )}
 
-                            <button
-                                type="button"
-                                className={`${styles.favorite} ${
-                                    favorite
-                                        ? styles.favoriteActive
-                                        : ""
-                                }`}
-                                onClick={handleFavorite}
-                            >
-                                {favorite ? "♥" : "♡"}
-                            </button>
+                            <FavoriteButton propertyId={property.id} className={styles.favorite} />
                         </div>
 
                         {photos.length > 1 && (
-                            <div
-                                className={
-                                    styles.thumbnails
-                                }
-                            >
-                                {photos
-                                    .slice(1, 4)
-                                    .map((photo) => (
-                                        <div
-                                            key={photo.id}
-                                            className={
-                                                styles.thumbnail
-                                            }
-                                        >
-                                            <img
-                                                src={`http://127.0.0.1:8000${photo.image}`}
-                                                alt=""
-                                            />
-                                        </div>
-                                    ))}
+                            <div className={styles.thumbnails}>
+                                {photos.map((photo, index) => (
+                                    <button
+                                        key={photo.id}
+                                        type="button"
+                                        className={index === photoIndex ? styles.thumbActive : ""}
+                                        onClick={() => setPhotoIndex(index)}
+                                        aria-label={`Фото ${index + 1} из ${photos.length}`}
+                                        aria-current={index === photoIndex}
+                                    >
+                                        <img src={thumbnailUrl(photo)} alt="" />
+                                    </button>
+                                ))}
                             </div>
                         )}
                     </section>
 
-                    <section className={styles.info}>
-                        <div className={styles.tags}>
-                            <span>
-                                {
-                                    propertyType[
-                                        property
-                                            .property_type
-                                    ]
-                                }
-                            </span>
-
-                            <span>
-                                {
-                                    dealType[
-                                        property.deal_type
-                                    ]
-                                }
-                            </span>
-                        </div>
-
-                        <h1>{property.title}</h1>
-
-                        <div className={styles.price}>
-                            {Number(
-                                property.price
-                            ).toLocaleString(
-                                "ru-RU"
-                            )}{" "}
-                            ₸
-                        </div>
-
-                        <div className={styles.address}>
-                            <span>⌖</span>
-
-                            <div>
-                                <strong>
-                                    {property.city}
-                                </strong>
-
-                                <p>
-                                    {
-                                        property.address
-                                    }
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className={styles.details}>
-                            <div>
-                                <span>Площадь</span>
-                                <strong>
-                                    {property.area} м²
-                                </strong>
-                            </div>
-
-                            {property.rooms && (
-                                <div>
-                                    <span>
-                                        Комнаты
-                                    </span>
-                                    <strong>
-                                        {
-                                            property.rooms
-                                        }
-                                    </strong>
-                                </div>
-                            )}
-
-                            {property.floor && (
-                                <div>
-                                    <span>
-                                        Этаж
-                                    </span>
-                                    <strong>
-                                        {
-                                            property.floor
-                                        }
-                                        {property.total_floors &&
-                                            ` / ${property.total_floors}`}
-                                    </strong>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className={styles.description}>
-                            <h2>Описание</h2>
-
-                            <p>
-                                {
-                                    property.description
-                                }
-                            </p>
-                        </div>
-
-                        <div className={styles.owner}>
-                            <div
-                                className={
-                                    styles.ownerAvatar
-                                }
-                            >
-                                {(
-                                    owner?.first_name ||
-                                    owner?.username ||
-                                    "U"
-                                )
-                                    .charAt(0)
-                                    .toUpperCase()}
-                            </div>
-
-                            <div>
-                                <span>
-                                    Объявление
-                                    размещено
-                                </span>
-
-                                <strong>
-                                    {owner
-                                        ? `${owner.first_name || ""} ${
-                                              owner.last_name ||
-                                              ""
-                                          }`.trim() ||
-                                          owner.username
-                                        : "Пользователь"}
-                                </strong>
-                            </div>
-                        </div>
-
-                        {owner?.phone && (
-                            <a
-                                href={`tel:${owner.phone}`}
-                                className={
-                                    styles.contact
-                                }
-                            >
-                                Позвонить продавцу
-                            </a>
-                        )}
+                    <section className={styles.description}>
+                        <h2>Описание</h2>
+                        <p>{property.description}</p>
                     </section>
                 </div>
+
+                <aside className={styles.aside}>
+                    <p className={styles.kind}>
+                        {listingKind(property)}
+                        {isInactive && (
+                            <span className={styles.status}>
+                                {STATUS_LABELS[property.status]}
+                            </span>
+                        )}
+                    </p>
+
+                    <h1 className={styles.title}>{property.title}</h1>
+
+                    <p className={`${styles.price} num`}>
+                        {formatPrice(property.price)}
+                        {property.deal_type === "rent" && (
+                            <span className={styles.per}> в месяц</span>
+                        )}
+                    </p>
+
+                    <p className={styles.address}>
+                        {property.city}, {property.address}
+                    </p>
+
+                    <p className={styles.posted}>
+                        Размещено {formatDate(property.created_at)}
+                    </p>
+
+                    <dl className={styles.specs}>
+                        <div>
+                            <dt>Площадь</dt>
+                            <dd className="num">{formatArea(property.area)} м²</dd>
+                        </div>
+
+                        {property.rooms && (
+                            <div>
+                                <dt>Комнат</dt>
+                                <dd className="num">{property.rooms}</dd>
+                            </div>
+                        )}
+
+                        {property.floor && (
+                            <div className={styles.floor}>
+                                <dt>Этаж</dt>
+                                <dd>
+                                    <FloorGauge
+                                        floor={property.floor}
+                                        total={property.total_floors}
+                                        size="large"
+                                    />
+                                </dd>
+                            </div>
+                        )}
+                    </dl>
+
+                    <div className={styles.owner}>
+                        <span className={styles.ownerAvatar} aria-hidden="true">
+                            {ownerName.charAt(0).toUpperCase()}
+                        </span>
+                        <div>
+                            <strong>{ownerName}</strong>
+                            <span>{isOwner ? "Это ваше объявление" : "Владелец"}</span>
+                        </div>
+                    </div>
+
+                    {!isOwner && owner?.phone && (
+                        <a href={`tel:${owner.phone}`} className={`btn btn-primary ${styles.call}`}>
+                            Позвонить: {owner.phone}
+                        </a>
+                    )}
+
+                    {!isOwner && owner && !owner.phone && (
+                        <p className={styles.noPhone}>Владелец не указал телефон.</p>
+                    )}
+
+                    {isOwner && (
+                        <div className={styles.ownerActions}>
+                            <Link to={`/properties/${property.id}/edit`} className="btn btn-ghost">
+                                Редактировать
+                            </Link>
+
+                            <button
+                                type="button"
+                                className="btn btn-danger"
+                                onClick={handleDelete}
+                                disabled={isDeleting}
+                            >
+                                {isDeleting ? "Удаляем…" : "Удалить"}
+                            </button>
+                        </div>
+                    )}
+                </aside>
             </div>
         </div>
     );

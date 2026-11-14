@@ -1,5 +1,10 @@
-.list {
+.grid {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 24px;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+    gap: 40px 24px;
+}
+
+.message {
+    padding: 48px 0;
+    color: var(--slate);
 }

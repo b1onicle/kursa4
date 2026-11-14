@@ -1,365 +1,215 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import styles from "../../styles/Profile.module.css";
+import PropertyCard from "../PropertyCard/PropertyCard";
+import Pagination from "../Pagination/Pagination";
 
 import {
-    useGetUserQuery,
-    useUpdateUserMutation,
+    useGetMeQuery,
+    useUpdateMeMutation,
     useGetFavoritesQuery,
+    useGetPropertiesQuery,
 } from "../../features/api/apiSlice";
 
-import {
-    useCurrentUser,
-    setCurrentUser,
-} from "../../utils/auth";
+import { useCurrentUser, setCurrentUser } from "../../utils/auth";
+import { listingsCount } from "../../utils/format";
+import { useDocumentTitle } from "../../utils/useDocumentTitle";
+
+const MY_PROPERTIES_PAGE_SIZE = 6;
+
+const CONTACT_FIELDS = [
+    ["first_name", "Имя", "text"],
+    ["last_name", "Фамилия", "text"],
+    ["email", "Email", "email"],
+    ["phone", "Телефон", "tel"],
+];
+
+const toForm = (user) =>
+    Object.fromEntries(CONTACT_FIELDS.map(([name]) => [name, user?.[name] || ""]));
 
 const Profile = () => {
     const currentUser = useCurrentUser();
     const USER_ID = currentUser?.id;
+    useDocumentTitle("Профиль");
 
-    const {
-        data: user,
-        isLoading,
-        isError,
-    } = useGetUserQuery(USER_ID, {
+    const { data: user, isLoading, isError } = useGetMeQuery(undefined, {
         skip: !USER_ID,
     });
 
-    const { data: favorites = [] } =
-        useGetFavoritesQuery(USER_ID, {
-            skip: !USER_ID,
-        });
-
-    const [updateUser, { isLoading: isSaving }] =
-        useUpdateUserMutation();
-
-    const [editing, setEditing] = useState(false);
-
-    const [form, setForm] = useState({
-        first_name: "",
-        last_name: "",
-        email: "",
-        phone: "",
+    const { data: favorites = [] } = useGetFavoritesQuery(USER_ID, {
+        skip: !USER_ID,
     });
 
-    React.useEffect(() => {
-        if (user) {
-            setForm({
-                first_name: user.first_name || "",
-                last_name: user.last_name || "",
-                email: user.email || "",
-                phone: user.phone || "",
-            });
-        }
+    const [myPropertiesPage, setMyPropertiesPage] = useState(1);
+
+    const { data: myPropertiesData } = useGetPropertiesQuery(
+        { owner: USER_ID, page: myPropertiesPage, page_size: MY_PROPERTIES_PAGE_SIZE },
+        { skip: !USER_ID }
+    );
+
+    const myProperties = myPropertiesData?.results ?? [];
+    const myPropertiesCount = myPropertiesData?.count ?? 0;
+
+    const [updateUser, { isLoading: isSaving }] = useUpdateMeMutation();
+
+    const [editing, setEditing] = useState(false);
+    const [form, setForm] = useState(toForm(null));
+    const [error, setError] = useState("");
+
+    useEffect(() => {
+        if (user) setForm(toForm(user));
     }, [user]);
 
-    if (!currentUser) {
-        return (
-            <div className={styles.message}>
-                <h2>Войдите в аккаунт</h2>
-
-                <p>
-                    Профиль доступен только
-                    авторизованным пользователям.
-                </p>
-
-                <a href="/login" className={styles.button}>
-                    Войти
-                </a>
-            </div>
-        );
-    }
-
     if (isLoading) {
-        return (
-            <div className={styles.message}>
-                Загрузка профиля...
-            </div>
-        );
+        return <div className={`page ${styles.message}`}>Загружаем профиль…</div>;
     }
 
     if (isError || !user) {
         return (
-            <div className={styles.message}>
-                <h2>Не удалось загрузить профиль</h2>
+            <div className={`page ${styles.message}`}>
+                <h1>Профиль не загрузился</h1>
+                <p>Проверьте, что сервер запущен, и обновите страницу.</p>
             </div>
         );
     }
 
     const handleChange = (event) => {
         const { name, value } = event.target;
-
-        setForm((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    const handleEdit = () => {
-        setEditing(true);
+        setForm((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleCancel = () => {
-        setForm({
-            first_name: user.first_name || "",
-            last_name: user.last_name || "",
-            email: user.email || "",
-            phone: user.phone || "",
-        });
-
+        setForm(toForm(user));
+        setError("");
         setEditing(false);
     };
 
     const handleSave = async (event) => {
         event.preventDefault();
+        setError("");
 
         try {
-            const updatedUser = await updateUser({
-                id: USER_ID,
-                ...form,
-            }).unwrap();
-
+            const updatedUser = await updateUser(form).unwrap();
             setCurrentUser(updatedUser);
             setEditing(false);
-        } catch (error) {
-            console.error(
-                "Ошибка обновления профиля:",
-                error
-            );
+        } catch (err) {
+            console.error("Ошибка обновления профиля:", err);
+            setError("Изменения не сохранены. Проверьте email и попробуйте ещё раз.");
         }
     };
 
     const displayName =
-        `${user.first_name || ""} ${
-            user.last_name || ""
-        }`.trim() || user.username;
+        `${user.first_name || ""} ${user.last_name || ""}`.trim() || user.username;
 
     return (
-        <div className={styles.page}>
-            <div className={styles.container}>
-                <div className={styles.header}>
-                    <div>
-                        <span className={styles.label}>
-                            АККАУНТ
-                        </span>
+        <div className="page">
+            <header className={styles.header}>
+                <span className={styles.avatar} aria-hidden="true">
+                    {displayName.charAt(0).toUpperCase()}
+                </span>
 
-                        <h1>Мой профиль</h1>
+                <div>
+                    <h1>{displayName}</h1>
+                    <p className={styles.meta}>
+                        @{user.username}
+                        <span className={styles.sep} aria-hidden="true" />
+                        <Link to="/favorites" className="num">
+                            {favorites.length} в избранном
+                        </Link>
+                    </p>
+                </div>
+            </header>
 
-                        <p>
-                            Управляйте своими контактными
-                            данными.
-                        </p>
+            <div className={styles.layout}>
+                <section className={styles.contacts} aria-labelledby="contacts-title">
+                    <div className={styles.sectionHead}>
+                        <h2 id="contacts-title">Контакты</h2>
+                        {!editing && (
+                            <button type="button" className="btn btn-ghost" onClick={() => setEditing(true)}>
+                                Изменить
+                            </button>
+                        )}
                     </div>
-                </div>
 
-                <div className={styles.layout}>
-                    <aside className={styles.sidebar}>
-                        <div className={styles.avatar}>
-                            {displayName
-                                .charAt(0)
-                                .toUpperCase()}
-                        </div>
+                    <p className={styles.hint}>
+                        Телефон видят покупатели на странице ваших объявлений.
+                    </p>
 
-                        <h2>{displayName}</h2>
+                    {editing ? (
+                        <form className={styles.form} onSubmit={handleSave}>
+                            {CONTACT_FIELDS.map(([name, label, type]) => (
+                                <div className="field" key={name}>
+                                    <label htmlFor={`profile-${name}`}>{label}</label>
+                                    <input
+                                        id={`profile-${name}`}
+                                        name={name}
+                                        type={type}
+                                        className="input"
+                                        value={form[name]}
+                                        onChange={handleChange}
+                                    />
+                                </div>
+                            ))}
 
-                        <span className={styles.username}>
-                            @{user.username}
-                        </span>
+                            {error && (
+                                <div className="form-error" role="alert">
+                                    {error}
+                                </div>
+                            )}
 
-                        <div className={styles.stats}>
-                            <div>
-                                <strong>
-                                    {favorites.length}
-                                </strong>
-
-                                <span>
-                                    Избранное
-                                </span>
-                            </div>
-
-                            <div>
-                                <strong>
-                                    {user.id}
-                                </strong>
-
-                                <span>
-                                    ID аккаунта
-                                </span>
-                            </div>
-                        </div>
-                    </aside>
-
-                    <section className={styles.card}>
-                        <div className={styles.cardHeader}>
-                            <div>
-                                <h2>
-                                    Личные данные
-                                </h2>
-
-                                <p>
-                                    Основная информация
-                                    вашего аккаунта.
-                                </p>
-                            </div>
-
-                            {!editing && (
-                                <button
-                                    type="button"
-                                    className={
-                                        styles.editButton
-                                    }
-                                    onClick={handleEdit}
-                                >
-                                    Редактировать
+                            <div className={styles.actions}>
+                                <button type="button" className="btn btn-ghost" onClick={handleCancel}>
+                                    Отмена
                                 </button>
-                            )}
-                        </div>
-
-                        <form
-                            onSubmit={handleSave}
-                            className={styles.form}
-                        >
-                            <div className={styles.row}>
-                                <div
-                                    className={
-                                        styles.field
-                                    }
-                                >
-                                    <label>
-                                        Имя
-                                    </label>
-
-                                    <input
-                                        name="first_name"
-                                        value={
-                                            form.first_name
-                                        }
-                                        onChange={
-                                            handleChange
-                                        }
-                                        disabled={!editing}
-                                        placeholder="Ваше имя"
-                                    />
-                                </div>
-
-                                <div
-                                    className={
-                                        styles.field
-                                    }
-                                >
-                                    <label>
-                                        Фамилия
-                                    </label>
-
-                                    <input
-                                        name="last_name"
-                                        value={
-                                            form.last_name
-                                        }
-                                        onChange={
-                                            handleChange
-                                        }
-                                        disabled={!editing}
-                                        placeholder="Ваша фамилия"
-                                    />
-                                </div>
+                                <button type="submit" className="btn btn-primary" disabled={isSaving}>
+                                    {isSaving ? "Сохраняем…" : "Сохранить"}
+                                </button>
                             </div>
-
-                            <div
-                                className={styles.field}
-                            >
-                                <label>
-                                    Логин
-                                </label>
-
-                                <input
-                                    value={
-                                        user.username
-                                    }
-                                    disabled
-                                />
-
-                                <span
-                                    className={
-                                        styles.hint
-                                    }
-                                >
-                                    Логин нельзя изменить.
-                                </span>
-                            </div>
-
-                            <div
-                                className={styles.field}
-                            >
-                                <label>
-                                    Email
-                                </label>
-
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={form.email}
-                                    onChange={
-                                        handleChange
-                                    }
-                                    disabled={!editing}
-                                    placeholder="example@mail.com"
-                                />
-                            </div>
-
-                            <div
-                                className={styles.field}
-                            >
-                                <label>
-                                    Телефон
-                                </label>
-
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={form.phone}
-                                    onChange={
-                                        handleChange
-                                    }
-                                    disabled={!editing}
-                                    placeholder="+7 700 000 00 00"
-                                />
-                            </div>
-
-                            {editing && (
-                                <div
-                                    className={
-                                        styles.actions
-                                    }
-                                >
-                                    <button
-                                        type="button"
-                                        className={
-                                            styles.cancel
-                                        }
-                                        onClick={
-                                            handleCancel
-                                        }
-                                    >
-                                        Отмена
-                                    </button>
-
-                                    <button
-                                        type="submit"
-                                        className={
-                                            styles.save
-                                        }
-                                        disabled={isSaving}
-                                    >
-                                        {isSaving
-                                            ? "Сохранение..."
-                                            : "Сохранить"}
-                                    </button>
-                                </div>
-                            )}
                         </form>
-                    </section>
-                </div>
+                    ) : (
+                        <dl className={styles.list}>
+                            {CONTACT_FIELDS.map(([name, label]) => (
+                                <div key={name}>
+                                    <dt>{label}</dt>
+                                    <dd className={user[name] ? "" : styles.empty}>
+                                        {user[name] || "Не указано"}
+                                    </dd>
+                                </div>
+                            ))}
+                        </dl>
+                    )}
+                </section>
+
+                <section className={styles.listings} aria-labelledby="my-listings-title">
+                    <div className={styles.sectionHead}>
+                        <div>
+                            <h2 id="my-listings-title">Мои объявления</h2>
+                            <p className={`${styles.hint} num`}>
+                                {listingsCount(myPropertiesCount)}
+                            </p>
+                        </div>
+                    </div>
+
+                    {myProperties.length === 0 ? (
+                        <p className={styles.emptyListings}>
+                            Здесь появятся ваши объявления.{" "}
+                            <Link to="/properties/create">Разместить первое</Link>
+                        </p>
+                    ) : (
+                        <div className={styles.grid}>
+                            {myProperties.map((property) => (
+                                <PropertyCard key={property.id} property={property} />
+                            ))}
+                        </div>
+                    )}
+
+                    <Pagination
+                        page={myPropertiesPage}
+                        totalPages={Math.ceil(myPropertiesCount / MY_PROPERTIES_PAGE_SIZE)}
+                        onPageChange={setMyPropertiesPage}
+                    />
+                </section>
             </div>
         </div>
     );

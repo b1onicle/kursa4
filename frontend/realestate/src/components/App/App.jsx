@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 import AppRoutes from "../Routes/Routes";
 import Header from "../Header/Header";
@@ -8,46 +9,36 @@ import Sidebar from "../Sidebar/Sidebar";
 import { useCurrentUser } from "../../utils/auth";
 
 const App = () => {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
     const currentUser = useCurrentUser();
+    const { pathname } = useLocation();
 
-    const toggleSidebar = () => {
-        setSidebarOpen((prev) => !prev);
-    };
-
-    const closeSidebar = () => {
-        setSidebarOpen(false);
-    };
-
-    // Закрываем меню при выходе из аккаунта
+    // Close the menu after navigation or logout.
     useEffect(() => {
-        if (!currentUser) {
-            setSidebarOpen(false);
-        }
-    }, [currentUser]);
+        setMenuOpen(false);
+    }, [pathname, currentUser]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
 
     return (
         <div className="app">
-            {currentUser && (
-                <Sidebar
-                    isOpen={sidebarOpen}
-                    onClose={closeSidebar}
-                />
-            )}
+            <Header
+                onMenuClick={() => setMenuOpen((prev) => !prev)}
+                isMenuOpen={menuOpen}
+            />
 
-            <div className="appContent">
-                <Header
-                    onMenuClick={toggleSidebar}
-                    isMenuOpen={sidebarOpen}
-                    isAuthenticated={Boolean(currentUser)}
-                />
+            <Sidebar
+                isOpen={menuOpen}
+                onClose={() => setMenuOpen(false)}
+            />
 
-                <main>
-                    <AppRoutes />
-                </main>
+            <main>
+                <AppRoutes />
+            </main>
 
-                <Footer />
-            </div>
+            <Footer />
         </div>
     );
 };

@@ -1,110 +1,59 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 import styles from "../../styles/Favorites.module.css";
 import PropertyCard from "../PropertyCard/PropertyCard";
 import { useGetFavoritesQuery } from "../../features/api/apiSlice";
 import { useCurrentUser } from "../../utils/auth";
+import { listingsCount } from "../../utils/format";
+import { useDocumentTitle } from "../../utils/useDocumentTitle";
 
 const Favorites = () => {
     const currentUser = useCurrentUser();
     const USER_ID = currentUser?.id;
+    useDocumentTitle("Избранное");
 
     const {
         data: favorites = [],
         isLoading,
         isError,
-    } = useGetFavoritesQuery(USER_ID, {
-        skip: !USER_ID,
-    });
-
-    if (!currentUser) {
-        return (
-            <div className={styles.message}>
-                <div className={styles.messageIcon}>♡</div>
-
-                <h2>Войдите в аккаунт</h2>
-
-                <p>
-                    Чтобы сохранять понравившиеся
-                    объявления в избранное.
-                </p>
-
-                <a href="/login" className={styles.button}>
-                    Войти
-                </a>
-            </div>
-        );
-    }
-
-    if (isLoading) {
-        return (
-            <div className={styles.message}>
-                Загрузка избранного...
-            </div>
-        );
-    }
-
-    if (isError) {
-        return (
-            <div className={styles.message}>
-                <h2>Не удалось загрузить избранное</h2>
-
-                <p>
-                    Попробуйте обновить страницу.
-                </p>
-            </div>
-        );
-    }
+    } = useGetFavoritesQuery(USER_ID, { skip: !USER_ID });
 
     return (
-        <div className={styles.page}>
-            <div className={styles.header}>
-                <div>
-                    <span className={styles.label}>
-                        ВАШИ СОХРАНЕНИЯ
-                    </span>
+        <div className="page">
+            <header className={styles.header}>
+                <h1>Избранное</h1>
+                {!isLoading && !isError && (
+                    <p className="num">{listingsCount(favorites.length)}</p>
+                )}
+            </header>
 
-                    <h1>Избранное</h1>
+            {isLoading && <p className={styles.message}>Загружаем избранное…</p>}
 
-                    <p>
-                        Объявления, которые вы сохранили.
-                    </p>
-                </div>
+            {isError && (
+                <p className={styles.message}>
+                    Избранное не загрузилось. Проверьте, что сервер запущен,
+                    и обновите страницу.
+                </p>
+            )}
 
-                <span className={styles.count}>
-                    {favorites.length} объектов
-                </span>
-            </div>
-
-            {favorites.length === 0 ? (
+            {!isLoading && !isError && favorites.length === 0 && (
                 <div className={styles.empty}>
-                    <div className={styles.emptyIcon}>
-                        ♡
-                    </div>
-
-                    <h2>
-                        Здесь пока ничего нет
-                    </h2>
-
+                    <h2>Пока пусто</h2>
                     <p>
-                        Добавляйте понравившиеся
-                        объявления, нажимая на сердечко.
+                        Нажмите на сердечко на фотографии объявления, и оно
+                        появится здесь.
                     </p>
-
-                    <a
-                        href="/properties"
-                        className={styles.button}
-                    >
-                        Смотреть объявления
-                    </a>
+                    <Link to="/properties" className="btn btn-primary">
+                        Открыть каталог
+                    </Link>
                 </div>
-            ) : (
+            )}
+
+            {favorites.length > 0 && (
                 <div className={styles.grid}>
                     {favorites.map((favorite) => (
-                        <PropertyCard
-                            key={favorite.id}
-                            property={favorite.property_data}
-                        />
+                        <PropertyCard key={favorite.id} property={favorite.property_data} />
                     ))}
                 </div>
             )}

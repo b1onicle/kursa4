@@ -1,57 +1,60 @@
-
-import React from "react";
+import React, { useState } from "react";
 import PropertyCard from "../PropertyCard/PropertyCard";
+import Pagination from "../Pagination/Pagination";
 
 import { useGetPropertiesQuery } from "../../features/api/apiSlice";
 import styles from "../../styles/PropertyList.module.css";
 
-const PropertyList = ({ propertyType, dealType, city }) => {
-    const {
-        data: properties = [],
-        isLoading,
-        error,
-    } = useGetPropertiesQuery();
+// Newest listings, optionally paginated.
+const PropertyList = ({ pageSize = 12, paginated = true }) => {
+    const [page, setPage] = useState(1);
+
+    const { data, isLoading, error } = useGetPropertiesQuery({
+        ordering: "newest",
+        page,
+        page_size: pageSize,
+    });
 
     if (isLoading) {
-        return <p>Загрузка объявлений...</p>;
+        return <p className={styles.message}>Загружаем объявления…</p>;
     }
 
     if (error) {
-        return <p>Ошибка загрузки объявлений.</p>;
+        return (
+            <p className={styles.message}>
+                Не удалось загрузить объявления. Проверьте, что сервер
+                запущен, и обновите страницу.
+            </p>
+        );
     }
 
-    const filteredProperties = properties.filter((property) => {
-        const matchesType =
-            propertyType === "all" ||
-            property.property_type === propertyType;
+    const properties = data?.results ?? [];
+    const totalPages = Math.ceil((data?.count ?? 0) / pageSize);
 
-        const matchesDeal =
-            dealType === "all" ||
-            property.deal_type === dealType;
-
-        const searchCity = city.trim().toLowerCase();
-
-        const matchesCity =
-            !searchCity ||
-            property.city.toLowerCase().includes(searchCity) ||
-            property.address.toLowerCase().includes(searchCity);
-
-        return matchesType && matchesDeal && matchesCity;
-    });
+    if (properties.length === 0) {
+        return (
+            <p className={styles.message}>
+                Объявлений пока нет. Разместите первое.
+            </p>
+        );
+    }
 
     return (
-        <div className={styles.list}>
-            {filteredProperties.length === 0 ? (
-                <p>Объявлений по вашему запросу не найдено.</p>
-            ) : (
-                filteredProperties.map((property) => (
-                    <PropertyCard
-                        key={property.id}
-                        property={property}
-                    />
-                ))
+        <>
+            <div className={styles.grid}>
+                {properties.map((property) => (
+                    <PropertyCard key={property.id} property={property} />
+                ))}
+            </div>
+
+            {paginated && (
+                <Pagination
+                    page={page}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                />
             )}
-        </div>
+        </>
     );
 };
 

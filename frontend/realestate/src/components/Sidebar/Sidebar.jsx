@@ -1,187 +1,124 @@
-import React from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import styles from "../../styles/Sidebar.module.css";
 import { ROUTES } from "../../utils/routes";
-import {
-    useCurrentUser,
-    logoutUser,
-} from "../../utils/auth";
+import { useCurrentUser, logoutUser } from "../../utils/auth";
+import { apiSlice, useLogoutMutation } from "../../features/api/apiSlice";
 
+const linkClass = ({ isActive }) => (isActive ? styles.active : "");
+
+// Slide-in menu: account actions on desktop, the whole navigation on mobile.
 const Sidebar = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const currentUser = useCurrentUser();
+    const [logout] = useLogoutMutation();
 
-    const handleLogout = () => {
+    useEffect(() => {
+        if (!isOpen) return undefined;
+
+        const onKeyDown = (event) => {
+            if (event.key === "Escape") onClose();
+        };
+
+        window.addEventListener("keydown", onKeyDown);
+        return () => window.removeEventListener("keydown", onKeyDown);
+    }, [isOpen, onClose]);
+
+    const handleLogout = async () => {
+        // Revoke the token on the server; sign out locally even if it fails.
+        await logout().unwrap().catch(() => {});
         logoutUser();
+        dispatch(apiSlice.util.resetApiState());
         navigate(ROUTES.HOME);
-        onClose();
     };
 
-    const handleNavigation = () => {
-        onClose();
-    };
+    const name = currentUser
+        ? `${currentUser.first_name || ""} ${currentUser.last_name || ""}`.trim() ||
+          currentUser.username
+        : "";
 
     return (
         <>
-            {isOpen && (
-                <div
-                    className={styles.overlay}
-                    onClick={onClose}
-                />
-            )}
+            <div
+                className={`${styles.overlay} ${isOpen ? styles.visible : ""}`}
+                onClick={onClose}
+                aria-hidden="true"
+            />
 
             <aside
-                className={`${styles.sidebar} ${
-                    isOpen ? styles.open : ""
-                }`}
+                className={`${styles.drawer} ${isOpen ? styles.open : ""}`}
+                aria-label="Меню"
+                aria-hidden={!isOpen}
+                inert={isOpen ? undefined : ""}
             >
-                <div className={styles.logo}>
-                    <NavLink
-                        to={ROUTES.HOME}
-                        onClick={handleNavigation}
-                    >
-                        <span className={styles.logoMark}>
-                            R
+                {currentUser && (
+                    <div className={styles.user}>
+                        <span className={styles.avatar}>
+                            {name.charAt(0).toUpperCase()}
                         </span>
-                        <span>RealEstate</span>
-                    </NavLink>
-                </div>
 
-                <nav className={styles.navigation}>
-                    <span className={styles.sectionTitle}>
-                        МЕНЮ
-                    </span>
+                        <div>
+                            <strong>{name}</strong>
+                            <span>@{currentUser.username}</span>
+                        </div>
+                    </div>
+                )}
 
-                    <NavLink
-                        to={ROUTES.HOME}
-                        onClick={handleNavigation}
-                        className={({ isActive }) =>
-                            isActive
-                                ? styles.active
-                                : ""
-                        }
-                        end
-                    >
-                        <span className={styles.icon}>
-                            ⌂
-                        </span>
+                <nav className={styles.links}>
+                    <NavLink to={ROUTES.HOME} className={linkClass} end>
                         Главная
                     </NavLink>
 
-                    <NavLink
-                        to={ROUTES.PROPERTIES}
-                        onClick={handleNavigation}
-                        className={({ isActive }) =>
-                            isActive
-                                ? styles.active
-                                : ""
-                        }
-                    >
-                        <span className={styles.icon}>
-                            ▦
-                        </span>
-                        Объявления
+                    <NavLink to={ROUTES.PROPERTIES} className={linkClass} end>
+                        Каталог
                     </NavLink>
 
-                    <NavLink
-                        to={ROUTES.FAVORITES}
-                        onClick={handleNavigation}
-                        className={({ isActive }) =>
-                            isActive
-                                ? styles.active
-                                : ""
-                        }
-                    >
-                        <span className={styles.icon}>
-                            ♡
-                        </span>
-                        Избранное
-                    </NavLink>
+                    {currentUser && (
+                        <>
+                            <NavLink to={ROUTES.FAVORITES} className={linkClass}>
+                                Избранное
+                            </NavLink>
+
+                            <NavLink to={ROUTES.PROFILE} className={linkClass}>
+                                Профиль и мои объявления
+                            </NavLink>
+                        </>
+                    )}
                 </nav>
 
-                <div className={styles.divider} />
+                <div className={styles.bottom}>
+                    {currentUser ? (
+                        <>
+                            <Link
+                                to="/properties/create"
+                                className="btn btn-lamp"
+                            >
+                                Разместить объявление
+                            </Link>
 
-                <nav className={styles.navigation}>
-                    <span className={styles.sectionTitle}>
-                        АККАУНТ
-                    </span>
+                            <button
+                                type="button"
+                                className="btn btn-ghost"
+                                onClick={handleLogout}
+                            >
+                                Выйти
+                            </button>
+                        </>
+                    ) : (
+                        <>
+                            <Link to="/register" className="btn btn-primary">
+                                Регистрация
+                            </Link>
 
-                    <NavLink
-                        to={ROUTES.PROFILE}
-                        onClick={handleNavigation}
-                        className={({ isActive }) =>
-                            isActive
-                                ? styles.active
-                                : ""
-                        }
-                    >
-                        <span className={styles.icon}>
-                            ◉
-                        </span>
-                        Профиль
-                    </NavLink>
-                </nav>
-
-                <div className={styles.spacer} />
-
-                <NavLink
-                    to="/properties/create"
-                    onClick={handleNavigation}
-                    className={styles.addButton}
-                >
-                    <span>+</span>
-                    Подать объявление
-                </NavLink>
-
-                {currentUser ? (
-                    <div className={styles.user}>
-                        <div className={styles.avatar}>
-                            {(
-                                currentUser.first_name ||
-                                currentUser.username
-                            )
-                                .charAt(0)
-                                .toUpperCase()}
-                        </div>
-
-                        <div className={styles.userInfo}>
-                            <strong>
-                                {currentUser.first_name ||
-                                    currentUser.username}
-                            </strong>
-
-                            <span>
-                                @{currentUser.username}
-                            </span>
-                        </div>
-
-                        <button
-                            type="button"
-                            className={styles.logout}
-                            onClick={handleLogout}
-                            title="Выйти"
-                        >
-                            ↪
-                        </button>
-                    </div>
-                ) : (
-                    <div className={styles.auth}>
-                        <NavLink
-                            to="/login"
-                            onClick={handleNavigation}
-                        >
-                            Войти
-                        </NavLink>
-
-                        <NavLink
-                            to="/register"
-                            onClick={handleNavigation}
-                        >
-                            Регистрация
-                        </NavLink>
-                    </div>
-                )}
+                            <Link to="/login" className="btn btn-ghost">
+                                Войти
+                            </Link>
+                        </>
+                    )}
+                </div>
             </aside>
         </>
     );

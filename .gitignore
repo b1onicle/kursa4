@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
+env/
+
+# Django
+*.sqlite3
+backend/RealEstate/media/
+
+# Environment
+.env
+
+# Node
+node_modules/
+frontend/realestate/build/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

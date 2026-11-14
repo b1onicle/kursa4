@@ -13,82 +13,39 @@ import Profile from "../Profile/Profile";
 import Register from "../Register/Register";
 import Login from "../Login/Login";
 import PropertyForm from "../PropertyForm/PropertyForm";
+import ForgotPassword from "../PasswordReset/ForgotPassword";
+import ResetPassword from "../PasswordReset/ResetPassword";
+import NotFound from "../NotFound/NotFound";
 
 const AppRoutes = () => {
     const currentUser = useCurrentUser();
 
+    // Pages for signed-in users send guests to the login page.
+    const privatePage = (element) =>
+        currentUser ? element : <Navigate to="/login" replace />;
+
+    // Login and registration are not needed once signed in.
+    const guestPage = (element) =>
+        currentUser ? <Navigate to="/" replace /> : element;
+
     return (
         <Routes>
-            <Route
-    path="/properties/create"
-    element={
-        currentUser
-            ? <PropertyForm />
-            : <Navigate to="/login" replace />
-    }
-/>
-            {/* Главная зависит от авторизации */}
-            <Route
-                path="/"
-                element={
-                    currentUser ? <Home /> : <Landing />
-                }
-            />
+            <Route path="/" element={currentUser ? <Home /> : <Landing />} />
 
-            {/* Доступно всем */}
-            <Route
-                path={ROUTES.PROPERTIES}
-                element={<PropertyCatalog />}
-            />
+            <Route path={ROUTES.PROPERTIES} element={<PropertyCatalog />} />
+            <Route path="/properties/create" element={privatePage(<PropertyForm />)} />
+            <Route path="/properties/:id/edit" element={privatePage(<PropertyForm />)} />
+            <Route path={ROUTES.PROPERTY} element={<PropertyDetail />} />
 
-            <Route
-                path={ROUTES.PROPERTY}
-                element={<PropertyDetail />}
-            />
+            <Route path={ROUTES.FAVORITES} element={privatePage(<Favorites />)} />
+            <Route path={ROUTES.PROFILE} element={privatePage(<Profile />)} />
 
-            {/* Доступно только авторизованным */}
-            <Route
-                path={ROUTES.FAVORITES}
-                element={
-                    currentUser
-                        ? <Favorites />
-                        : <Navigate to="/login" replace />
-                }
-            />
+            <Route path="/register" element={guestPage(<Register />)} />
+            <Route path="/login" element={guestPage(<Login />)} />
+            <Route path="/forgot-password" element={guestPage(<ForgotPassword />)} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
-            <Route
-                path={ROUTES.PROFILE}
-                element={
-                    currentUser
-                        ? <Profile />
-                        : <Navigate to="/login" replace />
-                }
-            />
-
-            {/* Страницы авторизации */}
-            <Route
-                path="/register"
-                element={
-                    currentUser
-                        ? <Navigate to="/" replace />
-                        : <Register />
-                }
-            />
-
-            <Route
-                path="/login"
-                element={
-                    currentUser
-                        ? <Navigate to="/" replace />
-                        : <Login />
-                }
-            />
-
-            {/* Неизвестные адреса */}
-            <Route
-                path="*"
-                element={<Navigate to="/" replace />}
-            />
+            <Route path="*" element={<NotFound />} />
         </Routes>
     );
 };

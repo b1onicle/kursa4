@@ -4,14 +4,25 @@ import { Link, useNavigate } from "react-router-dom";
 import { useRegisterUserMutation } from "../../features/api/apiSlice";
 import { ROUTES } from "../../utils/routes";
 
-import styles from "../../styles/Register.module.css";
-import { setCurrentUser } from "../../utils/auth";
+import styles from "../../styles/Auth.module.css";
+import { setAuth } from "../../utils/auth";
+import { useDocumentTitle } from "../../utils/useDocumentTitle";
+
+// Server field names shown to people in error messages.
+const FIELD_LABELS = {
+    username: "Логин",
+    email: "Email",
+    password: "Пароль",
+    first_name: "Имя",
+    last_name: "Фамилия",
+    phone: "Телефон",
+};
 
 const Register = () => {
     const navigate = useNavigate();
+    useDocumentTitle("Регистрация");
 
-    const [registerUser, { isLoading }] =
-        useRegisterUserMutation();
+    const [registerUser, { isLoading }] = useRegisterUserMutation();
 
     const [form, setForm] = useState({
         username: "",
@@ -26,11 +37,7 @@ const Register = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        setForm((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
+        setForm((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -38,124 +45,87 @@ const Register = () => {
         setErrorMessage("");
 
         try {
-            const user = await registerUser(form).unwrap();
-
-            setCurrentUser(user);
-
-navigate(ROUTES.PROFILE);
+            const auth = await registerUser(form).unwrap();
+            setAuth(auth);
+            navigate(ROUTES.PROFILE);
         } catch (error) {
             console.error(error);
 
-            if (error?.data) {
+            if (error?.data && typeof error.data === "object") {
                 setErrorMessage(
-                    "Проверьте введённые данные."
+                    Object.entries(error.data)
+                        .map(([field, value]) => {
+                            const text = Array.isArray(value) ? value.join(" ") : String(value);
+                            return `${FIELD_LABELS[field] || field}: ${text}`;
+                        })
+                        .join("\n")
                 );
             } else {
-                setErrorMessage(
-                    "Не удалось зарегистрироваться."
-                );
+                setErrorMessage("Сервер не отвечает. Проверьте, что бэкенд запущен.");
             }
         }
     };
 
+    const input = (name, label, props = {}) => (
+        <div className="field">
+            <label htmlFor={`register-${name}`}>
+                {label}
+                {!props.required && <span className={styles.optional}> (необязательно)</span>}
+            </label>
+            <input
+                id={`register-${name}`}
+                className="input"
+                name={name}
+                value={form[name]}
+                onChange={handleChange}
+                {...props}
+            />
+        </div>
+    );
+
     return (
         <div className={styles.page}>
             <div className={styles.card}>
-                <h1>Создание аккаунта</h1>
-
+                <h1>Регистрация</h1>
                 <p className={styles.subtitle}>
-                    Зарегистрируйтесь, чтобы сохранять объявления
-                    и управлять своей недвижимостью.
+                    Аккаунт нужен, чтобы сохранять избранное и размещать
+                    свои объявления.
                 </p>
 
-                <form onSubmit={handleSubmit}>
-                    <label>
-                        Логин
-                        <input
-                            type="text"
-                            name="username"
-                            value={form.username}
-                            onChange={handleChange}
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Email
-                        <input
-                            type="email"
-                            name="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </label>
-
-                    <label>
-                        Пароль
-                        <input
-                            type="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            required
-                            minLength={6}
-                        />
-                    </label>
+                <form className={styles.form} onSubmit={handleSubmit}>
+                    {input("username", "Логин", { required: true, autoComplete: "username" })}
+                    {input("email", "Email", { required: true, type: "email", autoComplete: "email" })}
+                    {input("password", "Пароль", {
+                        required: true,
+                        type: "password",
+                        minLength: 6,
+                        autoComplete: "new-password",
+                    })}
 
                     <div className={styles.row}>
-                        <label>
-                            Имя
-                            <input
-                                type="text"
-                                name="first_name"
-                                value={form.first_name}
-                                onChange={handleChange}
-                            />
-                        </label>
-
-                        <label>
-                            Фамилия
-                            <input
-                                type="text"
-                                name="last_name"
-                                value={form.last_name}
-                                onChange={handleChange}
-                            />
-                        </label>
+                        {input("first_name", "Имя", { autoComplete: "given-name" })}
+                        {input("last_name", "Фамилия", { autoComplete: "family-name" })}
                     </div>
 
-                    <label>
-                        Телефон
-                        <input
-                            type="tel"
-                            name="phone"
-                            value={form.phone}
-                            onChange={handleChange}
-                        />
-                    </label>
+                    {input("phone", "Телефон", { type: "tel", autoComplete: "tel" })}
 
                     {errorMessage && (
-                        <p className={styles.error}>
+                        <div className="form-error" role="alert">
                             {errorMessage}
-                        </p>
+                        </div>
                     )}
 
                     <button
                         type="submit"
+                        className={`btn btn-primary ${styles.submit}`}
                         disabled={isLoading}
                     >
-                        {isLoading
-                            ? "Регистрация..."
-                            : "Зарегистрироваться"}
+                        {isLoading ? "Создаём аккаунт…" : "Создать аккаунт"}
                     </button>
                 </form>
 
-                <p className={styles.login}>
-                    Уже есть аккаунт?{" "}
-                    <Link to={ROUTES.PROFILE}>
-                        Войти
-                    </Link>
+                <p className={styles.switch}>
+                    Уже есть аккаунт? <Link to="/login">Войти</Link>
                 </p>
             </div>
         </div>

@@ -3,10 +3,13 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 
+import "@fontsource-variable/unbounded";
+import "@fontsource-variable/onest";
+// Global styles go before components so CSS modules win on equal specificity.
+import "./styles/index.css";
+
 import App from "./components/App/App";
 import { store } from "./features/store";
-
-import "./styles/index.css";
 
 const root = ReactDOM.createRoot(
     document.getElementById("root")

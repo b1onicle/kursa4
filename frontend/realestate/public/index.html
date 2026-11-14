@@ -3,9 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#233049" />
+    <meta
+        name="description"
+        content="Квартиры, дома и коммерческие помещения на продажу и в аренду."
+    />
     <title>RealEstate</title>
+    <script>
+        // Apply the saved theme before the first paint to avoid a flash.
+        try {
+            var theme = localStorage.getItem("theme");
+            if (theme === "light" || theme === "dark") {
+                document.documentElement.dataset.theme = theme;
+            }
+        } catch (e) {}
+    </script>
 </head>
 <body>
+    <noscript>Для работы сайта нужен JavaScript.</noscript>
     <div id="root"></div>
 </body>
 </html>

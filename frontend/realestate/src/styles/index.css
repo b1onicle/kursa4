@@ -1,65 +1,414 @@
-* {
+/*
+ * Design tokens: "windows at dusk".
+ * Concrete and paper for the everyday UI, dusk blue for the sky and
+ * primary actions, lamp yellow for lit windows, focus and favourites.
+ */
+:root {
+    color-scheme: light;
+
+    --concrete: #ecede9;
+    --paper: #fafaf8;
+    --ink: #1c2024;
+    --slate: #646b73;
+    --muted: #8d939a;
+    --line: #d4d7d1;
+    --line-strong: #b9bdb6;
+    --dusk: #233049;
+    --dusk-deep: #18213a;
+    --dusk-text: #233049;
+    --lamp: #f2b33d;
+    --lamp-soft: #fbe7b8;
+    --danger: #b3392f;
+
+    --surface-input: #ffffff;
+    --surface-sunken: #dfe1dc;
+    --surface-photo: #d6d9d3;
+    --header-bg: rgba(236, 237, 233, 0.88);
+    --overlay: rgba(24, 33, 58, 0.35);
+    --shadow: rgba(24, 33, 58, 0.18);
+    --focus-ring: rgba(35, 48, 73, 0.15);
+    --favorite-bg: rgba(250, 250, 248, 0.92);
+    --error-bg: #f7e4e1;
+    --error-text: #7d2720;
+    --btn-primary-bg: #233049;
+    --btn-primary-hover: #18213a;
+    --btn-primary-text: #ffffff;
+    --gauge-floor: #44527a;
+    --brand: #233049;
+
+    --font-display: "Unbounded Variable", "Arial Black", sans-serif;
+    --font-text: "Onest Variable", system-ui, sans-serif;
+
+    --radius-s: 6px;
+    --radius-m: 12px;
+    --radius-l: 20px;
+
+    --page-width: 1240px;
+    --gutter: clamp(16px, 4vw, 40px);
+
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*
+ * Night: the city after dark. Surfaces go to deep graphite, the lamp
+ * yellow stays, and dusk blue is lifted so buttons and links stay legible.
+ * Applied when chosen explicitly, or by the system unless "light" is chosen.
+ */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --concrete: #121519;
+    --paper: #1a1e24;
+    --ink: #e7e8e4;
+    --slate: #9ba2aa;
+    --muted: #6f767e;
+    --line: #2b3038;
+    --line-strong: #454c56;
+    --dusk-text: #a9bbe4;
+    --danger: #e0675c;
+
+    --surface-input: #15181d;
+    --surface-sunken: #242931;
+    --surface-photo: #20252c;
+    --header-bg: rgba(18, 21, 25, 0.85);
+    --overlay: rgba(0, 0, 0, 0.55);
+    --shadow: rgba(0, 0, 0, 0.5);
+    --focus-ring: rgba(169, 187, 228, 0.25);
+    --favorite-bg: rgba(26, 30, 36, 0.9);
+    --error-bg: #3a201d;
+    --error-text: #f4b8b0;
+    --btn-primary-bg: #3a4d7f;
+    --btn-primary-hover: #465c95;
+    --btn-primary-text: #ffffff;
+    --gauge-floor: #44527a;
+    --brand: #4a5f96;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+        color-scheme: dark;
+
+        --concrete: #121519;
+        --paper: #1a1e24;
+        --ink: #e7e8e4;
+        --slate: #9ba2aa;
+        --muted: #6f767e;
+        --line: #2b3038;
+        --line-strong: #454c56;
+        --dusk-text: #a9bbe4;
+        --danger: #e0675c;
+
+        --surface-input: #15181d;
+        --surface-sunken: #242931;
+        --surface-photo: #20252c;
+        --header-bg: rgba(18, 21, 25, 0.85);
+        --overlay: rgba(0, 0, 0, 0.55);
+        --shadow: rgba(0, 0, 0, 0.5);
+        --focus-ring: rgba(169, 187, 228, 0.25);
+        --favorite-bg: rgba(26, 30, 36, 0.9);
+        --error-bg: #3a201d;
+        --error-text: #f4b8b0;
+        --btn-primary-bg: #3a4d7f;
+        --btn-primary-hover: #465c95;
+        --btn-primary-text: #ffffff;
+        --gauge-floor: #44527a;
+        --brand: #4a5f96;
+    }
+}
+
+*,
+*::before,
+*::after {
     box-sizing: border-box;
 }
 
 html {
-    width: 100%;
-    min-height: 100%;
-    margin: 0;
-    padding: 0;
-    background: #0d0b0c;
+    -webkit-text-size-adjust: 100%;
 }
 
 body {
-    width: 100%;
-    min-height: 100vh;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #0d0b0c;
-    color: #f9f9ff;
-    font-family: Arial, sans-serif;
-}
-
-#root {
-    width: 100%;
-    min-height: 100vh;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: #0d0b0c;
-}
-
-.app {
-    width: 100%;
-    min-height: 100vh;
     margin: 0;
-    padding: 0;
-    background: #0d0b0c;
+    min-height: 100vh;
+
+    background: var(--concrete);
+    color: var(--ink);
+
+    font-family: var(--font-text);
+    font-size: 16px;
+    line-height: 1.5;
+    font-feature-settings: "tnum" 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+}
+
+p {
+    margin: 0;
 }
 
 a {
-    text-decoration: none;
     color: inherit;
+}
+
+img {
+    display: block;
+    max-width: 100%;
 }
 
 button,
 input,
 select,
 textarea {
-    font-family: inherit;
+    font: inherit;
+    color: inherit;
 }
 
 button {
     cursor: pointer;
 }
-.appContent {
-    min-height: 100vh;
-    margin-left: 235px;
 
-    background: #0d0b0c;
+:focus-visible {
+    outline: 3px solid var(--lamp);
+    outline-offset: 2px;
 }
 
-@media (max-width: 850px) {
-    .appContent {
-        margin-left: 0;
+::selection {
+    background: var(--lamp-soft);
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.app > main {
+    flex: 1;
+}
+
+.page {
+    width: 100%;
+    max-width: var(--page-width);
+    margin: 0 auto;
+    padding: 48px var(--gutter) 96px;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+}
+
+.num {
+    font-variant-numeric: tabular-nums;
+}
+
+/* Buttons */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    min-height: 46px;
+    padding: 0 22px;
+
+    border: 1px solid transparent;
+    border-radius: 999px;
+
+    font-size: 15px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+
+    transition:
+        background-color 0.15s,
+        border-color 0.15s,
+        color 0.15s;
+}
+
+.btn:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-text);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--btn-primary-hover);
+}
+
+.btn-lamp {
+    background: var(--lamp);
+    color: var(--dusk-deep);
+}
+
+.btn-lamp:hover:not(:disabled) {
+    background: #f6c35d;
+}
+
+.btn-ghost {
+    border-color: var(--line);
+    background: transparent;
+    color: var(--ink);
+}
+
+.btn-ghost:hover:not(:disabled) {
+    border-color: var(--ink);
+}
+
+.btn-danger {
+    border-color: var(--line);
+    background: transparent;
+    color: var(--danger);
+}
+
+.btn-danger:hover:not(:disabled) {
+    border-color: var(--danger);
+}
+
+/* Form controls */
+
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.field > label,
+.field-label {
+    color: var(--slate);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.input {
+    width: 100%;
+    min-height: 48px;
+    padding: 0 14px;
+
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+
+    background: var(--surface-input);
+    color: var(--ink);
+
+    transition: border-color 0.15s;
+}
+
+textarea.input {
+    padding: 12px 14px;
+    line-height: 1.55;
+    resize: vertical;
+}
+
+select.input {
+    appearance: none;
+    padding-right: 38px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23646B73' stroke-width='1.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+}
+
+.input:hover {
+    border-color: var(--line-strong);
+}
+
+.input:focus {
+    border-color: var(--dusk-text);
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.input::placeholder {
+    color: var(--muted);
+}
+
+.form-error {
+    padding: 12px 14px;
+
+    border-left: 3px solid var(--danger);
+    border-radius: 0 var(--radius-s) var(--radius-s) 0;
+
+    background: var(--error-bg);
+    color: var(--error-text);
+
+    font-size: 14px;
+    white-space: pre-line;
+}
+
+/* Segmented control (radio group styled as one switch) */
+
+.segmented {
+    display: inline-flex;
+    padding: 4px;
+
+    border-radius: 999px;
+    background: var(--surface-sunken);
+}
+
+.segmented label {
+    position: relative;
+}
+
+.segmented input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.segmented span {
+    display: block;
+    padding: 8px 16px;
+
+    border-radius: 999px;
+
+    color: var(--slate);
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+
+    transition:
+        background-color 0.2s var(--ease-out),
+        color 0.2s;
+}
+
+.segmented input:checked + span {
+    background: var(--paper);
+    color: var(--ink);
+    box-shadow: 0 1px 2px var(--shadow);
+}
+
+.segmented input:focus-visible + span {
+    outline: 3px solid var(--lamp);
+    outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
     }
 }

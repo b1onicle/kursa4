@@ -1,137 +1,57 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
+import Hero from "../Hero/Hero";
+import { useDocumentTitle } from "../../utils/useDocumentTitle";
+import PropertyList from "../PropertyList/PropertyList";
+import homeStyles from "../../styles/Home.module.css";
 import styles from "../../styles/Landing.module.css";
-import { ROUTES } from "../../utils/routes";
 
+// Home page for guests: search, a few fresh listings and an invitation to sellers.
 const Landing = () => {
+    // The home page uses the plain site name.
+    useDocumentTitle(null);
+
     return (
-        <div className={styles.page}>
-            <section className={styles.hero}>
-                <div className={styles.heroContent}>
-                    <span className={styles.label}>
-                        REAL ESTATE PLATFORM
-                    </span>
+        <>
+            <Hero />
 
-                    <h1>
-                        Найдите место,
-                        <br />
-                        которое станет <span>вашим.</span>
-                    </h1>
-
-                    <p className={styles.description}>
-                        Квартиры, дома и коммерческая недвижимость
-                        <br />
-                        в одном удобном сервисе.
-                    </p>
-
-                    <div className={styles.actions}>
-                        <Link
-                            to={ROUTES.PROPERTIES}
-                            className={styles.primaryButton}
-                        >
-                            Найти недвижимость
-                            <span>→</span>
-                        </Link>
-
-                        <Link
-                            to="/register"
-                            className={styles.secondaryButton}
-                        >
-                            Разместить объявление
-                        </Link>
-                    </div>
+            <section className={homeStyles.section}>
+                <div className={homeStyles.heading}>
+                    <h2>Новые объявления</h2>
+                    <Link to="/properties" className={homeStyles.more}>
+                        Весь каталог
+                    </Link>
                 </div>
 
-                <div className={styles.heroInfo}>
-                    <div>
-                        <strong>1000+</strong>
-                        <span>объектов</span>
-                    </div>
-
-                    <div>
-                        <strong>24/7</strong>
-                        <span>доступ к сервису</span>
-                    </div>
-
-                    <div>
-                        <strong>3</strong>
-                        <span>категории</span>
-                    </div>
-                </div>
+                <PropertyList pageSize={6} paginated={false} />
             </section>
 
-            <section className={styles.features}>
-                <div className={styles.sectionHeader}>
-                    <span className={styles.label}>
-                        ПОЧЕМУ REAL ESTATE
-                    </span>
+            <section className={styles.sellers}>
+                <div className={styles.sellersInner}>
+                    <h2>Продаёте или сдаёте?</h2>
 
-                    <h2>
-                        Всё необходимое
-                        <br />
-                        для поиска недвижимости
-                    </h2>
-                </div>
+                    <ol className={styles.steps}>
+                        <li>
+                            <strong>Создайте аккаунт</strong>
+                            <span>Нужны только логин, почта и пароль.</span>
+                        </li>
+                        <li>
+                            <strong>Опишите объект</strong>
+                            <span>Цена, площадь, этаж, адрес и до 10 фотографий.</span>
+                        </li>
+                        <li>
+                            <strong>Ждите звонков</strong>
+                            <span>Покупатели увидят ваш телефон на странице объявления.</span>
+                        </li>
+                    </ol>
 
-                <div className={styles.featureGrid}>
-                    <article className={styles.feature}>
-                        <span className={styles.number}>01</span>
-
-                        <h3>Большой выбор</h3>
-
-                        <p>
-                            Квартиры, дома и коммерческие
-                            объекты в одном месте.
-                        </p>
-                    </article>
-
-                    <article className={styles.feature}>
-                        <span className={styles.number}>02</span>
-
-                        <h3>Удобный поиск</h3>
-
-                        <p>
-                            Фильтруйте объявления по типу,
-                            цене, городу и другим параметрам.
-                        </p>
-                    </article>
-
-                    <article className={styles.feature}>
-                        <span className={styles.number}>03</span>
-
-                        <h3>Свои объявления</h3>
-
-                        <p>
-                            Размещайте собственные объекты
-                            и находите заинтересованных покупателей.
-                        </p>
-                    </article>
+                    <Link to="/register" className="btn btn-lamp">
+                        Создать аккаунт
+                    </Link>
                 </div>
             </section>
-
-            <section className={styles.bottomCta}>
-                <div>
-                    <span className={styles.label}>
-                        НАЧНИТЕ ПРЯМО СЕЙЧАС
-                    </span>
-
-                    <h2>
-                        Ваш следующий адрес
-                        <br />
-                        может быть здесь.
-                    </h2>
-                </div>
-
-                <Link
-                    to={ROUTES.PROPERTIES}
-                    className={styles.primaryButton}
-                >
-                    Смотреть объявления
-                    <span>→</span>
-                </Link>
-            </section>
-        </div>
+        </>
     );
 };
 

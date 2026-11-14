@@ -1,0 +1,46 @@
+.button {
+    display: grid;
+    place-items: center;
+
+    width: 40px;
+    height: 40px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: var(--favorite-bg);
+    color: var(--ink);
+}
+
+.button svg {
+    width: 20px;
+    height: 20px;
+
+    fill: transparent;
+    stroke: currentColor;
+    stroke-width: 1.8;
+
+    transition: fill 0.2s;
+}
+
+.button:hover svg {
+    fill: var(--lamp-soft);
+}
+
+.button:disabled {
+    cursor: progress;
+}
+
+.active svg,
+.active:hover svg {
+    fill: var(--lamp);
+    stroke: #b37812;
+    animation: pop 0.35s var(--ease-out);
+}
+
+/* Answers the click: the heart swells once when saved. */
+@keyframes pop {
+    40% {
+        transform: scale(1.3);
+    }
+}

@@ -10,7 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.1/ref/settings/
 """
 
+import os
 from pathlib import Path
+
+import django
+
+from django.core.exceptions import ImproperlyConfigured
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,13 +24,26 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.1/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!sisbadb$s#hhm@3sx_ff83!2j_ggtkum-(4b77+e8wftamh&n'
-
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = []
+# SECURITY WARNING: keep the secret key used in production secret!
+# A throwaway key is allowed only in debug mode for local development.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            'DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is false.'
+        )
+    SECRET_KEY = 'django-insecure-local-development-only-key'
+
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.environ.get(
+        'DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1'
+    ).split(',')
+    if host.strip()
+]
 
 
 # Application definition
@@ -39,8 +57,20 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'application',
     'rest_framework',
+    'rest_framework.authtoken',
     'corsheaders',
 ]
+
+REST_FRAMEWORK = {
+    # Token in the "Authorization: Token <key>" header; no session cookies,
+    # so the API does not need CSRF protection.
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ],
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -124,13 +154,26 @@ STATIC_URL = 'static/'
 # Email
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
-MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
-    },
-}
+# Emails (password reset links) are printed to the runserver console.
+# Django 6.1 configures mail with MAILERS; older versions ignore it and
+# would fall back to SMTP on localhost, so they get EMAIL_BACKEND instead.
+# Setting both on 6.1 is an error, hence the version check.
+_CONSOLE_EMAIL = 'django.core.mail.backends.console.EmailBackend'
+
+if django.VERSION >= (6, 1):
+    MAILERS = {
+        'default': {
+            'BACKEND': _CONSOLE_EMAIL,
+        },
+    }
+else:
+    EMAIL_BACKEND = _CONSOLE_EMAIL
 
 AUTH_USER_MODEL = 'application.User'
+
+# Django 6.1 defaults to BigAutoField, older versions to AutoField. Pin it so
+# that every version sees the same models and makemigrations stays clean.
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -138,3 +181,12 @@ MEDIA_ROOT = BASE_DIR / 'media'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:3000',
 ]
+
+DEFAULT_FROM_EMAIL = 'RealEstate <noreply@realestate.local>'
+
+# Frontend address used in password reset links.
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:3000')
+
+# Upload limits for listing photos.
+MAX_PHOTOS_PER_PROPERTY = 10
+MAX_PHOTO_SIZE = 5 * 1024 * 1024
